@@ -6,5 +6,6 @@
         "xstring": "cpp",
         "xutility": "cpp",
         "istream": "cpp"
-    }
+    },
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools"
 }

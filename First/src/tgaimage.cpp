@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "tagimage.h"
+#include "tgaimage.h"
 
 TGAImage::TGAImage() : data(NULL), width(0), height(0), bytespp(0)
 {
@@ -189,7 +189,7 @@ bool TGAImage::write_tga_file(const char *filename, bool rle)
     unsigned char footer[18] = {'T', 'R', 'U', 'E', 'V', 'I', 'S', 'I', 'O', 'N', '-', 'X', 'F', 'I', 'L', 'E', '.', '\0'};
     std::ofstream out;
     out.open(filename, std::ios::binary);
-    if (!out.is_open)
+    if (!out.is_open())
     {
         std::cerr << "can't open file " << filename << "\n";
         out.close();
