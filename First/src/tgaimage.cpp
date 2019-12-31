@@ -171,7 +171,7 @@ bool TGAImage::write_tga_file(const char *filename, bool rle) {
 	}
 	if (!rle) {
 		out.write((char *)data, width*height*bytespp);
-		std::cerr << "date len"<<width*height*bytespp;
+		
 		if (!out.good()) {
 			std::cerr << "can't unload raw data\n";
 			out.close();
