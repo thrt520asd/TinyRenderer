@@ -5,7 +5,7 @@
 #include "model.h"
 #include "geometry.h"
 #include <iostream>
-
+#include <stdio.h>
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red   = TGAColor(255, 0,   0,   255);
 const TGAColor green   = TGAColor(0, 255,   0,   255);
@@ -84,22 +84,54 @@ void triangle(Vec2i t0, Vec2i t1, Vec2i t2, TGAImage &image, TGAColor color){
     
 }
 
-Vec3f barycentric(Vec2i *pts, Vec2i p){
-    // Vec3f u = 
+Vec3f cross(Vec3f v1 ,Vec3f v2){
+    return Vec3f(v1.y*v2.z-v1.z*v2.y,v1.z*v2.x*v1.x*v2.z,v1.x*v2.y-v1.y*v2.x);
 }
 
+Vec3f barycentric(Vec2i *pts, Vec2i p){
+    Vec3f u = cross(Vec3f(pts[2].x-pts[0].x,pts[1].x-pts[0].x,pts[0].x-p.x),Vec3f(pts[2].y-pts[0].y,pts[1].y-pts[0].y,pts[0].y-p.y));
+    if(abs(u.z)<1) {
+        return Vec3f(-1,1,1);
+    }
+    return Vec3f(1.f-(u.x+u.y)/u.z,u.y/u.z,u.x/u.z);
+}
+
+int max(int x,int y){
+    return x>y?x:y;
+}
+
+int min(int x,int y){
+    return x>y?y:x;
+}
 void triangle2(Vec2i *pts, TGAImage &image, TGAColor color){
-    Vec2i bboxmin(image.get_width()-1, image.get_height()-1);
-    Vec2i bboxmax(0,0);
     Vec2i clamp(image.get_width()-1, image.get_height()-1);
+    int minx,miny,maxx,maxy;
+    minx=clamp.x;
+    miny=clamp.y;
+    maxx=0;
+    maxy=0;
     for (int i = 0; i < 3; i++)
     {
-        for (int j = 0; j < 2; j++)
-        {
-            // bboxmax[j]=std::
-        }
-        
+        minx = min(minx,pts[i].x);
+        maxx = max(maxx,pts[i].x);
+        miny = min(miny,pts[i].y);
+        maxy = max(maxy,pts[i].y);
     }
+    std::cerr<<minx<<","<<miny<<";"<<maxx<<","<<maxy;
+    Vec2i bboxmin = Vec2i(max(0,minx),max(0,maxx));
+    Vec2i bboxmax = Vec2i(min(clamp.x,maxx),min(clamp.y,maxy));
+    Vec2i p;
+    for (p.x = bboxmin.x; p.x <= bboxmax.x; p.x++)
+    {
+        for (p.y = bboxmin.y; p.y <= bboxmax.y; p.y++)
+        {
+            Vec3f bc_screen = barycentric(pts,p);
+            if(bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0) continue;
+            image.set(p.x,p.y,color);
+        }
+    }
+    
+    
     
 }
 
@@ -110,12 +142,13 @@ int main(int argc, char** argv) {
 	Vec2i t0[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)}; 
 	Vec2i t1[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)}; 
 	Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)}; 
-	triangle(t0[0], t0[1], t0[2],image , red);
-	triangle(t1[0], t1[1], t1[2],image , red);
-	triangle(t2[0], t2[1], t2[2],image , red);
+    triangle2(t0,image,red);
+	// triangle(t0[0], t0[1], t0[2],image , red);
+	// triangle(t1[0], t1[1], t1[2],image , red);
+	// triangle(t2[0], t2[1], t2[2],image , red);
 	image.flip_vertically();
 	image.write_tga_file("output_triangle.tga" , false);
-	// system("Pause");
+	system("Pause");
 
 	return 0;
 }
