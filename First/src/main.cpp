@@ -140,46 +140,34 @@ void triangle2(Vec2i *pts, TGAImage &image, TGAColor color){
 
 int main(int argc, char** argv) {
 	TGAImage image(width, height, TGAImage::RGB);
-	// Vec2i t0[3] = {Vec2i(10, 70),   Vec2i(50, 160),  Vec2i(70, 80)}; 
-	// Vec2i t1[3] = {Vec2i(180, 50),  Vec2i(150, 1),   Vec2i(70, 180)}; 
-	// Vec2i t2[3] = {Vec2i(180, 150), Vec2i(120, 160), Vec2i(130, 180)}; 
-    // triangle2(t0,image,red);
     
-
-	// triangle(t0[0], t0[1], t0[2],image , red);
-	// triangle(t1[0], t1[1], t1[2],image , red);
-	// triangle(t2[0], t2[1], t2[2],image , red);
-    Model mode = Model("D:/project/TinyRenderer/First/src/obj/african_head.obj");
-    for (int i=0; i<model->nfaces(); i++) { 
-    std::vector<int> face = model->face(i); 
-    Vec2i screen_coords[3]; 
-    try
+    Model *model = new Model("D:/project/TinyRenderer/First/src/obj/african_head.obj");
+    Vec2i screen_coords[3];
+    Vec3f world_coords[3];
+    Vec3f light_dir(0,0,-1);
+    for (int i = 0; i < model->nfaces(); i++)
     {
-        /* code */
-        for (int i = 0; i < model->nfaces(); i++)
+        std::vector<int> face = model->face(i);
+        Vec2i screen_corrds[3];
+        for (int j = 0; j < 3; j++)
         {
-            std::vector<int> face = model->face(i);
-            Vec2i screen_corrds[3];
-            for (int j = 0; j < 3; j++)
-            {
-                Vec3f world_coords = model->vert(face[j]);
-                screen_corrds[j] = Vec2i((world_coords.x+1.)*width/2.,(world_coords.y+1.)*height/2.);
-            }
-            triangle(screen_corrds[0],screen_corrds[1],screen_corrds[2],image,TGAColor(rand()%255,rand()%255,rand()%255,255));
+            Vec3f v = model->vert(face[j]);
+            screen_corrds[j] = Vec2i((v.x+1.)*width/2.,(v.y+1.)*height/2.);
+            world_coords[j] = v;
         }
+        //法线
+        Vec3f n = (world_coords[2] - world_coords[0])^(world_coords[1]-world_coords[0]);
+        n.normalize();
+        float intensity = n*light_dir;
+
+        if(intensity>0){
+            triangle(screen_corrds[0],screen_corrds[1],screen_corrds[2],image,TGAColor(intensity*255,intensity*255,intensity*255,255));
+        }   
     }
-    catch(const std::exception& e)
-    {
-        std::cerr << e.what() << '\n';
-    }
-    
-    
-    
     
 	image.flip_vertically();
 	image.write_tga_file("output_color_face.tga" , false);
 	system("Pause");
-
 	return 0;
 }
 

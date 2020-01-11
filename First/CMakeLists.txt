@@ -1,5 +1,5 @@
 PROJECT(First)
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
-
+file(REMOVE_RECURSE build)
 aux_source_directory(src DIR_SRCS)
 add_executable(out ${DIR_SRCS})
